@@ -2,7 +2,7 @@
 
 Marketing and product site for Mynah (`mynah.castalia.institute`), maintained by [Castalia Institute](https://github.com/CastaliaInstitute).
 
-Design specifications live under [`docs/design/`](docs/design/README.md).
+Design specifications live under [`docs/design/`](docs/design/README.md). Technology baselines (evaluated platforms such as Music Assistant) live under [`docs/technology/`](docs/technology/README.md).
 
 ## Codex build brief
 
@@ -14,7 +14,7 @@ The Codex-ready site brief (homepage copy, sections, positioning, visuals, image
 
 ## GitHub Pages
 
-Configured on **`main`** from **`/docs`** (legacy build). The publishing root includes [`docs/index.html`](docs/index.html), [`docs/CNAME`](docs/CNAME) (`mynah.castalia.institute`), and [`.nojekyll`](docs/.nojekyll) so static files are served as-is.
+Configured on **`main`** from **`/docs`** (legacy build). The publishing root includes [`docs/index.html`](docs/index.html), [`docs/CNAME`](docs/CNAME) (`mynah.castalia.institute`), and [`.nojekyll`](docs/.nojekyll) so static files are served as-is. There is no `gh pages` subcommand; use [`scripts/setup-github-pages.sh`](scripts/setup-github-pages.sh) (wraps `gh api`) to create or print the current Pages config, and `gh api -X POST repos/CastaliaInstitute/mynah/pages/builds` to queue a rebuild.
 
 - **Project URL (redirects to the custom domain):** https://castaliainstitute.github.io/mynah/
 - **Custom domain:** https://mynah.castalia.institute/ (works after the Cloudflare record below exists and DNS propagates)
