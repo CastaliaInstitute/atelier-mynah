@@ -4,6 +4,21 @@ Zone **castalia.institute** is on Cloudflare (nameservers `anirban.ns.cloudflare
 
 This subdomain points at **GitHub Pages** for repo `CastaliaInstitute/mynah` (project site). The CNAME target must be **`castaliainstitute.github.io`** (apex `github.io`, not a path).
 
+## Wrangler + DNS (recommended automation)
+
+**Wrangler has no `dns` command** — it targets Workers, KV, Pages deploy, etc. Zone DNS records are created with the **Cloudflare REST API**. Wrangler itself uses a **`CLOUDFLARE_API_TOKEN`** for many operations when that variable is set (see [Workers docs — API token](https://developers.cloudflare.com/workers/wrangler/ci-cd/#api-token)).
+
+1. Keep **`wrangler login`** if you use Workers/Pages locally; run **`wrangler whoami`** to confirm the account.
+2. Create a separate **API token** (Dashboard → My Profile → API Tokens) with **Zone → DNS → Edit** and **Zone → Zone → Read** on **`castalia.institute`** (or the whole account if you accept broader scope).
+3. Run the repo script (upserts the CNAME, **DNS only / not proxied**):
+
+```bash
+export CLOUDFLARE_API_TOKEN='…'
+./scripts/ensure-mynah-dns.sh
+```
+
+OAuth from `wrangler login` alone usually lists **`zone (read)`** and **cannot** create records; the API token is required for step 3.
+
 ## Dashboard (fastest)
 
 1. Cloudflare → **castalia.institute** → **DNS** → **Records** → **Add record**.

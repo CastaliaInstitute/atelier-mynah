@@ -31,4 +31,4 @@ The apex domain uses Cloudflare nameservers. Add this record on zone **castalia.
 
 Until this record exists, browsers following the `github.io` redirect may not load the site because GitHub sends traffic to `mynah.castalia.institute`.
 
-See [`docs/infrastructure/cloudflare-dns.md`](docs/infrastructure/cloudflare-dns.md) for the same steps plus optional Cloudflare API commands.
+See [`docs/infrastructure/cloudflare-dns.md`](docs/infrastructure/cloudflare-dns.md). To apply DNS from the CLI with Wrangler installed, create an API token (DNS Edit on the zone), then run [`scripts/ensure-mynah-dns.sh`](scripts/ensure-mynah-dns.sh) (`Wrangler` does not include a DNS subcommand; the script uses the official HTTP API and matches how Wrangler uses `CLOUDFLARE_API_TOKEN`).
