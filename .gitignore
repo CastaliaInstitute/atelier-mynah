@@ -2,8 +2,12 @@
 .env
 .env.*
 !.env.example
+!mcp/cloudflare-dns/.env.example
 node_modules/
 dist/
 .next/
 out/
 .vercel/
+
+# MCP Cloudflare token (see mcp/cloudflare-dns/.env.example)
+mcp/cloudflare-dns/.env.local

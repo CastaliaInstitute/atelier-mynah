@@ -19,9 +19,42 @@ export CLOUDFLARE_API_TOKEN='…'
 
 OAuth from `wrangler login` alone usually lists **`zone (read)`** and **cannot** create records; the API token is required for step 3.
 
-## Cursor Cloudflare MCP
+## Cursor MCP (this repo): `mynah-cloudflare-dns`
 
-The **`user-cloudflare-api`** MCP bundle in this workspace exposes Workers, KV, R2, zones list/get, routes, etc., but **does not include DNS record create/update/delete tools**. You cannot configure the `mynah` CNAME through that MCP until a `dns_records_*` (or equivalent) tool exists there. Use the **dashboard**, **`./scripts/ensure-mynah-dns.sh`**, or **`curl`** against the [DNS Records API](https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/create/) instead.
+This repository ships a small stdio MCP server that wraps the **Cloudflare DNS Records API**:
+
+- Path: **`mcp/cloudflare-dns/`** (`index.mjs`)
+- Tools: **`zones_list`**, **`dns_records_list`**, **`dns_cname_upsert`**
+- Auth: **`CLOUDFLARE_API_TOKEN`** with **Zone → DNS → Edit** and **Zone → Zone → Read** on **`castalia.institute`**
+
+### Cursor `mcp.json` snippet
+
+Add under `mcpServers` (adjust paths if your clone location differs):
+
+```json
+"mynah-cloudflare-dns": {
+  "command": "node",
+  "args": [
+    "/Users/danielmcshan/GitHub/CastaliaInstitute/mynah/mcp/cloudflare-dns/index.mjs"
+  ],
+  "cwd": "/Users/danielmcshan/GitHub/CastaliaInstitute/mynah/mcp/cloudflare-dns",
+  "envFile": "/Users/danielmcshan/GitHub/CastaliaInstitute/mynah/mcp/cloudflare-dns/.env.local"
+}
+```
+
+Then:
+
+```bash
+cd mcp/cloudflare-dns && npm install
+cp .env.example .env.local
+# edit .env.local — set CLOUDFLARE_API_TOKEN
+```
+
+Restart Cursor. From chat you can ask to call **`dns_cname_upsert`** with e.g. `zoneName: castalia.institute`, `recordName: mynah`, `content: castaliainstitute.github.io`, `proxied: false`.
+
+### Official `@cloudflare/mcp-server-cloudflare`
+
+The **`user-cloudflare-api`** / npm **`@cloudflare/mcp-server-cloudflare`** bundle exposes Workers, KV, R2, **zones list/get**, routes, etc., but **still no DNS record tools** in current releases. Use this repo’s **`mynah-cloudflare-dns`** MCP for DNS, or the **dashboard**, **`./scripts/ensure-mynah-dns.sh`**, or **`curl`** against the [DNS Records API](https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/create/).
 
 ## Dashboard (fastest)
 
