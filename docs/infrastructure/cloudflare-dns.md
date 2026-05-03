@@ -19,6 +19,10 @@ export CLOUDFLARE_API_TOKEN='…'
 
 OAuth from `wrangler login` alone usually lists **`zone (read)`** and **cannot** create records; the API token is required for step 3.
 
+## Cursor Cloudflare MCP
+
+The **`user-cloudflare-api`** MCP bundle in this workspace exposes Workers, KV, R2, zones list/get, routes, etc., but **does not include DNS record create/update/delete tools**. You cannot configure the `mynah` CNAME through that MCP until a `dns_records_*` (or equivalent) tool exists there. Use the **dashboard**, **`./scripts/ensure-mynah-dns.sh`**, or **`curl`** against the [DNS Records API](https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/create/) instead.
+
 ## Dashboard (fastest)
 
 1. Cloudflare → **castalia.institute** → **DNS** → **Records** → **Add record**.
