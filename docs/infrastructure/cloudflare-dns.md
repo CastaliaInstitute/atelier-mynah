@@ -34,3 +34,26 @@ curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records
 ```
 
 Replace `content` with your actual hosting CNAME target if not GitHub Pages.
+
+## GitHub shows `InvalidDNSError` / “DNS record could not be retrieved”
+
+GitHub asks the public DNS for your hostname. If **no record exists**, verification fails with **InvalidDNSError**.
+
+**Check from your machine** (should **not** be empty once configured):
+
+```bash
+dig +short mynah.castalia.institute CNAME
+# expect: castaliainstitute.github.io.
+```
+
+Querying Cloudflare’s authoritative nameserver directly (replace `deb` with `anirban` if you prefer):
+
+```bash
+dig mynah.castalia.institute CNAME +norecurse @deb.ns.cloudflare.com
+```
+
+If the status is **NXDOMAIN** or the answer section is **empty**, the **`mynah` record is missing** (or you’re editing DNS in the wrong Cloudflare account / wrong zone). Add the CNAME in the zone that serves **`castalia.institute`**, name **`mynah`**, target **`castaliainstitute.github.io`**.
+
+**Proxy:** keep **DNS only** (grey cloud) until GitHub accepts the domain and HTTPS is working; orange-cloud proxy can interfere with GitHub’s checks or TLS in some setups.
+
+After DNS resolves, re-check **Repository → Settings → Pages → Custom domain** and click **Save** if GitHub still shows an error.
