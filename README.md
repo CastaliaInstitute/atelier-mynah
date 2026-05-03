@@ -12,20 +12,23 @@ The Codex-ready site brief (homepage copy, sections, positioning, visuals, image
 
 - **GitHub:** https://github.com/CastaliaInstitute/mynah
 
-## DNS (`mynah.castalia.institute`)
+## GitHub Pages
 
-The apex domain uses Cloudflare nameservers (`castalia.institute` → Cloudflare). Add a DNS record in the Cloudflare dashboard for zone **castalia.institute**:
+Configured on **`main`** from **`/docs`** (legacy build). The publishing root includes [`docs/index.html`](docs/index.html), [`docs/CNAME`](docs/CNAME) (`mynah.castalia.institute`), and [`.nojekyll`](docs/.nojekyll) so static files are served as-is.
+
+- **Project URL (redirects to the custom domain):** https://castaliainstitute.github.io/mynah/
+- **Custom domain:** https://mynah.castalia.institute/ (works after the Cloudflare record below exists and DNS propagates)
+
+In **Settings → Pages**, turn on **Enforce HTTPS** once GitHub finishes issuing a certificate for the custom domain.
+
+## DNS (`mynah.castalia.institute`) — required
+
+The apex domain uses Cloudflare nameservers. Add this record on zone **castalia.institute**:
 
 | Type | Name | Target | Proxy |
 |------|------|--------|-------|
-| CNAME | `mynah` | Your hosting target (see below) | DNS only or proxied per your TLS/setup |
+| CNAME | `mynah` | `castaliainstitute.github.io` | DNS only (grey cloud) until GitHub TLS validates; then optional orange-cloud |
 
-**If you use GitHub Pages** for this repository (project site):
+Until this record exists, browsers following the `github.io` redirect may not load the site because GitHub sends traffic to `mynah.castalia.institute`.
 
-1. Repository **Settings → Pages**: set source (e.g. GitHub Actions or `main` + `/docs` or root `/`).
-2. **Settings → Pages → Custom domain:** `mynah.castalia.institute` (adds the Enforce HTTPS checkbox after validation).
-3. Cloudflare **CNAME** `mynah` → `castaliainstitute.github.io` (DNS only is typical until GitHub validates; you can enable the orange proxy after certificates succeed if desired).
-
-**If you use another host** (Vercel, Netlify, Cloudflare Pages): set the CNAME target to the hostname that provider gives you for the custom domain, then complete their custom-domain flow.
-
-See [`docs/infrastructure/cloudflare-dns.md`](docs/infrastructure/cloudflare-dns.md) for API/token automation if you prefer not to use the dashboard.
+See [`docs/infrastructure/cloudflare-dns.md`](docs/infrastructure/cloudflare-dns.md) for the same steps plus optional Cloudflare API commands.

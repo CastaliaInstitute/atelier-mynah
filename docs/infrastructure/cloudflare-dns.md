@@ -2,14 +2,16 @@
 
 Zone **castalia.institute** is on Cloudflare (nameservers `anirban.ns.cloudflare.com`, `deb.ns.cloudflare.com`).
 
+This subdomain points at **GitHub Pages** for repo `CastaliaInstitute/mynah` (project site). The CNAME target must be **`castaliainstitute.github.io`** (apex `github.io`, not a path).
+
 ## Dashboard (fastest)
 
 1. Cloudflare → **castalia.institute** → **DNS** → **Records** → **Add record**.
 2. **Type:** CNAME  
    **Name:** `mynah`  
-   **Target:** hosting hostname (e.g. `castaliainstitute.github.io` for GitHub Pages on this org repo).  
+   **Target:** `castaliainstitute.github.io`  
    **TTL:** Auto.  
-   **Proxy:** DNS only while validating TLS with GitHub or follow your host’s docs; then optional orange-cloud proxy.
+   **Proxy:** DNS only (grey cloud) while GitHub validates the custom domain and issues TLS; then optional orange-cloud proxy.
 
 ## API (optional)
 
