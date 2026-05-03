@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mynah · Castalia Institute</title>
+  <meta name="description" content="Mynah — ambient companion hardware from Castalia Institute." />
+  <style>
+    :root {
+      color-scheme: dark light;
+      --bg: #0f1210;
+      --fg: #e8ebe6;
+      --muted: #9aa396;
+      --accent: #c4e86f;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f6f7f4;
+        --fg: #1a1f1c;
+        --muted: #5c665e;
+        --accent: #4a6c2a;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+    }
+    main {
+      max-width: 40rem;
+      margin: 0 auto;
+      padding: min(12vh, 6rem) 1.5rem 4rem;
+    }
+    h1 {
+      font-size: clamp(1.75rem, 4vw, 2.25rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.75rem;
+    }
+    p { margin: 0 0 1rem; color: var(--muted); }
+    a { color: var(--accent); text-underline-offset: 0.15em; }
+    ul { padding-left: 1.25rem; color: var(--muted); }
+    li { margin: 0.35rem 0; }
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid color-mix(in srgb, var(--muted) 35%, transparent);
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Mynah</h1>
+    <p>Ambient companion hardware — gentle glow, circadian-aware presence, designed as part of Castalia Institute.</p>
+    <p>This site is hosted on GitHub Pages; product copy and build brief live in the repo and Cursor canvas.</p>
+    <p><strong>Design specs</strong></p>
+    <ul>
+      <li><a href="./design/README.md">Design docs index</a></li>
+      <li><a href="./design/hardware-platform.md">Hardware platform</a></li>
+      <li><a href="./design/ambient-time-of-day.md">Ambient time-of-day glow</a></li>
+    </ul>
+    <footer>
+      <a href="https://github.com/CastaliaInstitute/mynah">Repository</a>
+      · Castalia Institute
+    </footer>
+  </main>
+</body>
+</html>
