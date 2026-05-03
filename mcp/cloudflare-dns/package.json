@@ -1,7 +1,7 @@
 {
   "name": "mynah-cloudflare-dns-mcp",
   "version": "1.0.0",
-  "description": "Cursor MCP: Cloudflare DNS (zones_list, dns_records_list, dns_cname_upsert)",
+  "description": "Cursor MCP: Cloudflare domains & DNS (zones_create, nameservers, records)",
   "main": "index.mjs",
   "scripts": {
     "start": "node index.mjs"

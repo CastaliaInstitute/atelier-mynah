@@ -21,11 +21,19 @@ OAuth from `wrangler login` alone usually lists **`zone (read)`** and **cannot**
 
 ## Cursor MCP (this repo): `mynah-cloudflare-dns`
 
-This repository ships a small stdio MCP server that wraps the **Cloudflare DNS Records API**:
+This repository ships a small stdio MCP server for **domains on Cloudflare** (zones + DNS):
 
 - Path: **`mcp/cloudflare-dns/`** (`index.mjs`)
-- Tools: **`zones_list`**, **`dns_records_list`**, **`dns_cname_upsert`**
-- Auth: **`CLOUDFLARE_API_TOKEN`** with **Zone → DNS → Edit** and **Zone → Zone → Read** on **`castalia.institute`**
+- **Accounts:** **`accounts_list`**
+- **Zones (add/remove/setup):** **`zones_create`**, **`zones_list`**, **`zones_nameservers`**, **`zones_delete`** (requires `confirmationDomain`)
+- **DNS:** **`dns_records_list`**, **`dns_record_upsert`** (A, AAAA, CNAME, TXT, MX), **`dns_cname_upsert`**, **`dns_record_delete`**
+
+**API token:** Use a token whose scopes match what you call. Examples:
+
+- **Only DNS on existing zones:** Zone → DNS → Edit, Zone → Zone → Read.
+- **Add new domains (zones_create):** include **Zone → Zone → Edit** (and usually **Account → Account Settings → Read** so `accounts_list` / default account work).
+
+Flow for a **new** domain: **`zones_create`** → set registrar NS to returned **`name_servers`** → wait for **active** → **`dns_record_upsert`** / **`dns_cname_upsert`** as needed (e.g. GitHub Pages).
 
 ### Cursor `mcp.json` snippet
 
