@@ -4,6 +4,8 @@
 
 Mynah is built around a **compact mini smartphone** used primarily as a **soft, full-screen ambient glow** (dawn / dusk / sleep) rather than as a general-purpose daily driver. The device’s small footprint and bright-colored chassis make it plausible as a **bedside or shelf object** that happens to run Mynah.
 
+**Form factor (marketing & industrial design):** The physical object should always read as **mini-phone scale** — a **portrait rectangular slab** with phone-like aspect (~small smartphone proportions), thin depth, rounded corners, one dominant glowing screen face. **Do not** depict or imply **square cubes**, **spheres/orbs**, **pucks**, or **non-rectangular “ambient blobs”** as the product; accessories may differ, but **the device itself stays phone-shaped**.
+
 Reference listing snapshot (for industrial-design and scale context): `docs/assets/reference-platform-amazon-listing.png`.
 
 ## Reference device (target class)
