@@ -30,7 +30,11 @@ gh api "repos/${OWNER}/${REPO}/pages" \
 
 echo ""
 echo "Custom domain is read from docs/CNAME in the default branch."
-echo "After DNS resolves and GitHub issues a certificate, enforce HTTPS:"
+echo "After DNS resolves and GitHub issues a TLS certificate, enforce HTTPS:"
+echo "  ./scripts/gh-pages-enforce-https.sh"
+echo "(polls gh api PUT until GitHub accepts https_enforced — cert can lag DNS.)"
+echo ""
+echo "One-shot (fails until cert exists):"
 echo "  gh api -X PUT repos/${OWNER}/${REPO}/pages --input - <<'EOF'"
 echo '{'
 echo '  "build_type": "legacy",'

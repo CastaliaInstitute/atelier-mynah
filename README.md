@@ -19,7 +19,7 @@ Configured on **`main`** from **`/docs`** (legacy build). The publishing root in
 - **Project URL (redirects to the custom domain):** https://castaliainstitute.github.io/mynah/
 - **Custom domain:** https://mynah.castalia.institute/ (works after the Cloudflare record below exists and DNS propagates)
 
-In **Settings → Pages**, turn on **Enforce HTTPS** once GitHub finishes issuing a certificate for the custom domain.
+Once GitHub has provisioned a certificate for the custom domain, enable **Enforce HTTPS** from the CLI with [`scripts/gh-pages-enforce-https.sh`](scripts/gh-pages-enforce-https.sh) (polls `gh api` until the API accepts `https_enforced`), or toggle it under **Settings → Pages**.
 
 ## DNS (`mynah.castalia.institute`) — required
 
