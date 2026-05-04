@@ -46,16 +46,17 @@ Add under `mcpServers` (adjust paths if your clone location differs):
     "/Users/danielmcshan/GitHub/CastaliaInstitute/mynah/mcp/cloudflare-dns/index.mjs"
   ],
   "cwd": "/Users/danielmcshan/GitHub/CastaliaInstitute/mynah/mcp/cloudflare-dns",
-  "envFile": "/Users/danielmcshan/GitHub/CastaliaInstitute/mynah/mcp/cloudflare-dns/.env.local"
+  "envFile": "/Users/danielmcshan/GitHub/CastaliaInstitute/castalia.institute/.env"
 }
 ```
+
+Use **`mcp/cloudflare-dns/.env.local`** instead if you prefer a dedicated file. Many Castalia setups already define **`CLOUDFLARE_API_TOKEN`** in **`castalia.institute/.env`** — pointing **`envFile`** there avoids duplicating the secret.
 
 Then:
 
 ```bash
 cd mcp/cloudflare-dns && npm install
-cp .env.example .env.local
-# edit .env.local — set CLOUDFLARE_API_TOKEN
+# ensure CLOUDFLARE_API_TOKEN is set in the envFile you chose
 ```
 
 Restart Cursor. From chat you can ask to call **`dns_cname_upsert`** with e.g. `zoneName: castalia.institute`, `recordName: mynah`, `content: castaliainstitute.github.io`, `proxied: false`.
