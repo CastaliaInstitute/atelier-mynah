@@ -1,0 +1,26 @@
+# Creates/updates Cloudflare CNAME mynah → castaliainstitute.github.io (GitHub Pages).
+# One-time setup: add repo secret CLOUDFLARE_API_TOKEN (Zone DNS Edit + Zone Read on castalia.institute).
+name: Ensure mynah DNS
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dns:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Upsert mynah CNAME
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
+            echo "::error::Add repository secret CLOUDFLARE_API_TOKEN (Cloudflare: Zone DNS Edit + Zone Read for castalia.institute), then re-run this workflow."
+            exit 1
+          fi
+          bash scripts/ensure-mynah-dns.sh
