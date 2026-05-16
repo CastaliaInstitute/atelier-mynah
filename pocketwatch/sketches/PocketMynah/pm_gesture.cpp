@@ -2,6 +2,7 @@
 
 #include <cstring>
 
+#include "pm_config.h"
 #include "pm_touch.h"
 
 #ifndef MYNAH_GESTURE_TAP_SLOP_PX
@@ -169,11 +170,14 @@ static void on_release(uint32_t now, int16_t cx, int16_t cy) {
   if (dt <= MYNAH_GESTURE_SWIPE_MAX_MS && move >= MYNAH_GESTURE_SWIPE_MIN_PX) {
     g_chain = 0;
     g_chain_deadline = 0;
+    /** Thumb drift along the bottom rim while arming PTT reads as L/R swipe and cycles faces. */
+    const bool from_ptt_rim = g_y0 >= MYNAH_PTT_MIN_Y;
     PmGestureKind g = PmGestureKind::None;
-    if (g_madx > g_mady + 12) {
+    if (!from_ptt_rim && g_madx > g_mady + 12) {
       g = (cx > g_x0) ? PmGestureKind::SwipeRight : PmGestureKind::SwipeLeft;
     } else if (g_mady > g_madx + 12) {
-      g = (cy > g_y0) ? PmGestureKind::SwipeDown : PmGestureKind::SwipeUp;
+      /** CST92xx reports Y opposite to GFX for some boards; swap so “up” matches screen top. */
+      g = (cy > g_y0) ? PmGestureKind::SwipeUp : PmGestureKind::SwipeDown;
     }
     if (g != PmGestureKind::None) {
       PmGestureEvent ev = {};

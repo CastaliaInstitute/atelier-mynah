@@ -39,12 +39,8 @@ static uint8_t *g_pcm = nullptr;
 static size_t g_pcm_len = 0;
 static PmVoiceResult g_voice_result = {};
 static char g_gesture_banner[44] = "";
-/** Accent for the outer rim ring; BOOT / PWR side buttons advance hue. */
-static float g_rim_hue_deg = 218.f;
 /** Last full clock paint background (for second-hand erasure). */
 static uint16_t g_clock_bg565 = 0;
-/** Previous second-hand angle (radians); unset when < -500.f. */
-static float g_analog_prev_sec_angle = -1000.f;
 static int g_analog_saved_local_h = -1;
 static int g_analog_saved_local_m = -1;
 
@@ -63,21 +59,6 @@ static void cycle_clock_face(int delta) {
   const int n = static_cast<int>(ClockFace::kNumFaces);
   v = (v % n + n) % n;
   g_clock_face = static_cast<ClockFace>(v);
-}
-
-static const char *clock_face_banner_name(ClockFace f) {
-  switch (f) {
-    case ClockFace::ClassicAnalog:
-      return "classic";
-    case ClockFace::Apocalypso:
-      return "apocalypso";
-    case ClockFace::DigitalLocal:
-      return "digital";
-    case ClockFace::Spotify:
-      return "spotify";
-    default:
-      return "?";
-  }
 }
 
 static PmSpotifyStatus g_spotify_ui = {};
@@ -292,12 +273,6 @@ static void drawCenteredLine(const char *text, int y, uint16_t fg, uint8_t textS
   gfx->print(text);
 }
 
-static void draw_status_bar(bool wifi_ok, bool time_ok) {
-  char s[48];
-  snprintf(s, sizeof(s), "%s  %s", wifi_ok ? "WiFi" : "no WiFi", time_ok ? "NTP" : "no time");
-  drawCenteredLine(s, 40, RGB565_WHITE, 1, 1);
-}
-
 static constexpr float kPi = 3.14159265f;
 static constexpr float kTwoPi = kPi * 2.f;
 /** Face background `color565FromHsv`; rainbow rim uses same S/V so brightness matches. */
@@ -371,41 +346,6 @@ static void draw_analog_clock(uint16_t bg565, const struct tm *tm, bool valid) {
 
   gfx->fillCircle(cx, cy, 7, c_hour);
   gfx->fillCircle(cx, cy, 3, bg565);
-
-  if (valid) {
-    g_analog_prev_sec_angle = s_ang;
-  } else {
-    g_analog_prev_sec_angle = -1000.f;
-  }
-}
-
-static void tick_analog_second_only(uint16_t bg565, const struct tm *tm) {
-  const uint16_t c_sec = gfx->color565(255, 95, 95);
-  const uint16_t c_hour = gfx->color565(210, 218, 255);
-  const uint16_t c_min = RGB565_WHITE;
-  const int cx = kAnalogCx;
-  const int cy = kAnalogCy;
-  const int r = kAnalogR;
-
-  const float hf = static_cast<float>(tm->tm_hour % 12) + static_cast<float>(tm->tm_min) / 60.f +
-                   static_cast<float>(tm->tm_sec) / 3600.f;
-  const float h_ang = hf * (kTwoPi / 12.f) - kPi * 0.5f;
-  const float m_ang =
-      (static_cast<float>(tm->tm_min) + static_cast<float>(tm->tm_sec) / 60.f) * (kTwoPi / 60.f) -
-      kPi * 0.5f;
-  const float s_ang = static_cast<float>(tm->tm_sec) * (kTwoPi / 60.f) - kPi * 0.5f;
-
-  if (g_analog_prev_sec_angle > -500.f) {
-    draw_hand_radial(cx, cy, g_analog_prev_sec_angle, kAnalogSecLen, bg565, 1);
-  }
-  /** Erasing the second paints bg565 over hour/minute where they crossed; redraw them. */
-  draw_hand_radial(cx, cy, h_ang, r - 52, c_hour, 3);
-  draw_hand_radial(cx, cy, m_ang, r - 22, c_min, 2);
-  draw_hand_radial(cx, cy, s_ang, kAnalogSecLen, c_sec, 1);
-  gfx->fillCircle(cx, cy, 7, c_hour);
-  gfx->fillCircle(cx, cy, 3, bg565);
-  g_analog_prev_sec_angle = s_ang;
-  gfx->flush();
 }
 
 /** Apocalypso risk radar (12 axes, 5 rings) — matches apocalypso.castalia.institute RISK PROFILE widget. */
@@ -449,7 +389,7 @@ static void draw_apocalypso_face(const struct tm *tm, bool valid) {
   };
 
   const int rcx = LCD_WIDTH / 2;
-  const int rcy = 218;
+  const int rcy = LCD_HEIGHT / 2;
   const int rmax = 120;
   constexpr int k_axes = 12;
 
@@ -547,15 +487,15 @@ static void draw_radial_annulus_slice(int cx, int cy, float ang, int r0, int r1,
   }
 }
 
-static void draw_circumference_rainbow_24h(const struct tm *tm, bool valid, float hue_offset_deg) {
+/** 24h rim: outermost band; hue(sec of day) matches face fill (same formula as draw_clock_face). */
+static void draw_circumference_rainbow_24h(bool valid) {
   const int cx = LCD_WIDTH / 2;
   const int cy = LCD_HEIGHT / 2;
   const int R = min(LCD_WIDTH, LCD_HEIGHT) / 2;
-  /** Outer pixels often sit under the lens/bezel on round modules — keep the band clearly on glass. */
-  const int r_outer = R - 30;
-  /** Thin ring: ~2 px radial; tangential stroke bundle (k_half_w) must cover arc at r_outer (more segments = narrower bundle). */
-  const int r_inner = r_outer - 2;
-  constexpr int k_seg = 240;
+  /** Inset a few pixels from the physical edge (bezel / mask). */
+  const int r_outer = R - 4;
+  const int r_inner = r_outer - 5;
+  constexpr int k_seg = 288;
   constexpr int k_half_w = 4;
 
   auto wrap360 = [](float d) {
@@ -576,23 +516,14 @@ static void draw_circumference_rainbow_24h(const struct tm *tm, bool valid, floa
     }
     float hue_deg;
     if (valid) {
-      const float hour_f = af * (24.f / kTwoPi);
-      hue_deg = wrap360(hour_f * 15.f + hue_offset_deg);
+      /** `af` = 0 at top → midnight; same mapping as `sec_of_day * (360/86400)` on the face. */
+      const float sec_of_day = af * (86400.f / kTwoPi);
+      hue_deg = wrap360(sec_of_day * (360.f / 86400.f));
     } else {
-      hue_deg = wrap360(af * (360.f / kTwoPi) + hue_offset_deg +
-                        fmodf(static_cast<float>(millis()) * 0.025f, 360.f));
+      hue_deg = wrap360(af * (360.f / kTwoPi) + fmodf(static_cast<float>(millis()) * 0.025f, 360.f));
     }
     const uint16_t col = color565FromHsv(gfx, hue_deg, k_clock_face_hsv_s, k_clock_face_hsv_v);
     draw_radial_annulus_slice(cx, cy, amid, r_inner, r_outer, col, k_half_w);
-  }
-
-  if (valid) {
-    const float hnow = static_cast<float>(tm->tm_hour) + static_cast<float>(tm->tm_min) / 60.f +
-                       static_cast<float>(tm->tm_sec) / 3600.f;
-    const float now_a = hnow * (kTwoPi / 24.f) - kPi * 0.5f;
-    const int r0 = r_inner - 3;
-    const int r1 = r_outer + 3;
-    draw_radial_annulus_slice(cx, cy, now_a, r0, r1, RGB565_WHITE, 1);
   }
 }
 
@@ -601,7 +532,7 @@ static void draw_clock_face() {
   int sec_of_day_for_hue = 0;
   if (pm_time_valid()) {
     pm_time_local(&tm);
-    sec_of_day_for_hue = tm.tm_hour * 3600 + tm.tm_min * 60;
+    sec_of_day_for_hue = tm.tm_hour * 3600 + tm.tm_min * 60 + tm.tm_sec;
   }
   const float hue =
       pm_time_valid() ? static_cast<float>(sec_of_day_for_hue) * (360.0f / 86400.0f)
@@ -627,20 +558,15 @@ static void draw_clock_face() {
       break;
   }
 
-  draw_status_bar(pm_wifi_connected(), pm_time_valid());
   const int banner_y = (g_clock_face == ClockFace::Apocalypso || g_clock_face == ClockFace::Spotify)
                            ? 352
                            : 320;
   if (g_gesture_banner[0] != '\0') {
     drawCenteredLine(g_gesture_banner, banner_y, gfx->color565(255, 220, 160), 1, 1);
   }
-  drawCenteredLine("L/R swipe = face", 378, gfx->color565(200, 220, 255), 1, 1);
-  drawCenteredLine("lower rim ~0.4s hold = talk", 400, gfx->color565(200, 220, 255), 1, 1);
-  drawCenteredLine("swipe / multi-tap", 422, gfx->color565(180, 200, 230), 1, 1);
-  drawCenteredLine("PocketMynah", 444, gfx->color565(180, 200, 255), 1, 1);
 
-  /** Rainbow annulus last so status/footer do not paint over it (fillTriangle was also unreliable). */
-  draw_circumference_rainbow_24h(&tm, pm_time_valid(), g_rim_hue_deg);
+  /** Rainbow annulus last so the gesture banner does not paint over it. */
+  draw_circumference_rainbow_24h(pm_time_valid());
   g_clock_bg565 = bg;
   if (pm_time_valid()) {
     g_analog_saved_local_h = tm.tm_hour;
@@ -697,14 +623,7 @@ void setup() {
 void loop() {
   pm_screen_http_loop();
   const uint32_t now = millis();
-  const uint8_t side_ev = pm_side_buttons_poll(now);
-  if (side_ev != 0) {
-    g_rim_hue_deg += 48.f;
-    while (g_rim_hue_deg >= 360.f) {
-      g_rim_hue_deg -= 360.f;
-    }
-    g_clock_repaint_pending = true;
-  }
+  (void)pm_side_buttons_poll(now);
 
   pm_gesture_poll(now);
 
@@ -714,8 +633,9 @@ void loop() {
         (ge.kind == PmGestureKind::SwipeLeft || ge.kind == PmGestureKind::SwipeRight)) {
       cycle_clock_face(ge.kind == PmGestureKind::SwipeLeft ? 1 : -1);
       g_clock_repaint_pending = true;
-      snprintf(g_gesture_banner, sizeof(g_gesture_banner), "face: %s",
-               clock_face_banner_name(g_clock_face));
+      g_gesture_banner[0] = '\0';
+      Serial.printf("[gesture] face @ %d,%d\n", static_cast<int>(ge.x), static_cast<int>(ge.y));
+      continue;
     } else if (g_state == AppState::kClock && g_clock_face == ClockFace::Spotify &&
                (ge.kind == PmGestureKind::SwipeUp || ge.kind == PmGestureKind::SwipeDown ||
                 ge.kind == PmGestureKind::Tap || ge.kind == PmGestureKind::LongPress)) {
@@ -765,7 +685,7 @@ void loop() {
   }
 
   static uint32_t s_ptt_press_ms = 0;
-  const bool ptt_hold = pm_touch_held_in_ptt_zone();
+  const bool ptt_hold = pm_ptt_button_held();
   if (g_state == AppState::kClock) {
     if (ptt_hold) {
       if (s_ptt_press_ms == 0) {
@@ -821,7 +741,8 @@ void loop() {
           (now - s_last_spotify_poll_ms >= MYNAH_SPOTIFY_POLL_MS);
 
       const bool full_paint = !s_clock_paint_inited || slow_no_time || banner_chg || wifi_chg ||
-                              g_clock_repaint_pending || local_hm_chg || spotify_stale;
+                              g_clock_repaint_pending || local_hm_chg || spotify_stale ||
+                              (valid && sec_tick);
 
       if (full_paint) {
         s_clock_paint_inited = true;
@@ -845,11 +766,6 @@ void loop() {
         if (!valid) {
           s_last_no_time_redraw = now;
         }
-      } else if (valid && sec_tick) {
-        if (g_clock_face == ClockFace::ClassicAnalog) {
-          tick_analog_second_only(g_clock_bg565, &tm_now);
-        }
-        s_prev_epoch = epoch;
       }
 
       if (ptt_armed && g_pcm) {
@@ -884,7 +800,7 @@ void loop() {
         }
         memcpy(g_pcm + g_pcm_len, frame, frame_bytes);
         g_pcm_len += frame_bytes;
-        if (!pm_touch_held_in_ptt_zone()) {
+        if (!pm_ptt_button_held()) {
           break;
         }
       }

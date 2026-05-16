@@ -20,11 +20,12 @@
 #define MYNAH_VOICE_MAX_PCM_BYTES (16000 * 2 * 5)
 #endif
 
+/** Touch Y ≥ this is treated as “bottom rim” for gesture swipe suppression (not used for PTT). */
 #ifndef MYNAH_PTT_MIN_Y
 #define MYNAH_PTT_MIN_Y 260
 #endif
 
-/** Continuous hold in PTT zone before mic arms (lets double-tap / short taps be gestures). */
+/** Hold BOOT this long before mic arms (avoids accidental voice from a tap). */
 #ifndef MYNAH_PTT_ARM_MS
 #define MYNAH_PTT_ARM_MS 400
 #endif

@@ -58,3 +58,7 @@ uint8_t pm_side_buttons_poll(uint32_t now_ms) {
   }
   return ev;
 }
+
+bool pm_ptt_button_held(void) {
+  return digitalRead(MYNAH_BOOT_BUTTON_GPIO) == LOW;
+}

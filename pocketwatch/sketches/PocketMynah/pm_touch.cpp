@@ -3,7 +3,6 @@
 #include <Wire.h>
 
 #include "pin_config.h"
-#include "pm_config.h"
 #include "touch/TouchDrvCST92xx.h"
 
 static TouchDrvCST92xx g_touch;
@@ -28,14 +27,4 @@ uint8_t pm_touch_sample(int16_t *xs, int16_t *ys, uint8_t max_pts) {
     ys[i] = static_cast<int16_t>(p.y);
   }
   return copy;
-}
-
-bool pm_touch_held_in_ptt_zone() {
-  int16_t xs[5];
-  int16_t ys[5];
-  const uint8_t n = pm_touch_sample(xs, ys, 5);
-  if (n == 0) {
-    return false;
-  }
-  return ys[0] >= MYNAH_PTT_MIN_Y;
 }
