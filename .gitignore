@@ -11,3 +11,18 @@ out/
 
 # MCP Cloudflare token (see mcp/cloudflare-dns/.env.example)
 mcp/cloudflare-dns/.env.local
+
+# Android
+android/local.properties
+android/.gradle/
+android/**/build/
+android/*.iml
+android/.idea/
+android/captures/
+
+# Mynah Pocketwatch (ESP32) — local secrets and PlatformIO
+pocketwatch/include/secrets.h
+pocketwatch/include/secrets.local.h
+pocketwatch/.pio/
+pocketwatch/firmware-bare/.pio/
+pocketwatch/vendor/

@@ -11,6 +11,7 @@ The Codex-ready site brief (homepage copy, sections, positioning, visuals, image
 ## Repository
 
 - **GitHub:** https://github.com/CastaliaInstitute/mynah
+- **Mynah Pocketwatch (ESP32-S3 firmware):** [`pocketwatch/`](pocketwatch/) — see [`docs/design/pocketwatch.md`](docs/design/pocketwatch.md)
 
 ## GitHub Pages
 
