@@ -105,13 +105,33 @@ function spotifyConnectPageUrl(req: Request, result?: Record<string, string>): s
   return url.toString();
 }
 
-function connectPage(req: Request): Response {
-  const base = supabaseUrl();
-  const anon = anonKey();
-  if (!base || !anon) {
-    return jsonResponse(500, { error: "Supabase is not configured" });
+function defaultSpotifyUserId(): string {
+  return (
+    Deno.env.get("MYNAH_SPOTIFY_DEFAULT_USER_ID")?.trim() ||
+    "20b89826-c35a-42eb-bb4d-c20108a3e54e"
+  );
+}
+
+async function connectPage(req: Request): Promise<Response> {
+  const { clientId } = spotifyEnv();
+  const userId = defaultSpotifyUserId();
+  if (!clientId) {
+    return jsonResponse(500, { error: "SPOTIFY_CLIENT_ID is not configured" });
   }
-  return redirectResponse(spotifyConnectPageUrl(req));
+  if (!userId) {
+    return jsonResponse(500, { error: "MYNAH_SPOTIFY_DEFAULT_USER_ID is not configured" });
+  }
+  const state = await createOAuthState(userId);
+  await spotifyDebugEvent("direct_oauth_state_created", undefined, userId);
+  const params = new URLSearchParams({
+    client_id: clientId,
+    response_type: "code",
+    redirect_uri: spotifyRedirectUri(req),
+    scope: SPOTIFY_SCOPES,
+    state,
+    show_dialog: "true",
+  });
+  return redirectResponse(`https://accounts.spotify.com/authorize?${params.toString()}`);
 }
 
 async function authUserId(req: Request): Promise<string | null> {
@@ -132,12 +152,48 @@ async function authUserId(req: Request): Promise<string | null> {
   return user.id ?? null;
 }
 
+async function spotifyDebugEvent(event: string, detail?: string, userId?: string | null): Promise<void> {
+  const base = supabaseUrl();
+  if (!base || !serviceRoleKey()) return;
+  try {
+    await fetch(`${base}/rest/v1/mynah_spotify_debug_events`, {
+      method: "POST",
+      headers: { ...restHeaders(true), Prefer: "return=minimal" },
+      body: JSON.stringify({
+        event,
+        user_id: userId ?? null,
+        detail: detail ? detail.slice(0, 480) : null,
+      }),
+    });
+  } catch {
+    // Best-effort diagnostics only.
+  }
+}
+
 async function userSpotifyRefreshToken(userId: string): Promise<string | null> {
   const base = supabaseUrl();
   const service = serviceRoleKey();
   if (!base || !service) return null;
   const res = await fetch(
     `${base}/rest/v1/mynah_spotify_connections?user_id=eq.${encodeURIComponent(userId)}&select=refresh_token`,
+    {
+      headers: {
+        apikey: service,
+        Authorization: `Bearer ${service}`,
+      },
+    },
+  );
+  if (!res.ok) return null;
+  const rows = await res.json() as Array<{ refresh_token?: string }>;
+  return rows[0]?.refresh_token?.trim() || null;
+}
+
+async function latestSpotifyRefreshToken(): Promise<string | null> {
+  const base = supabaseUrl();
+  const service = serviceRoleKey();
+  if (!base || !service) return null;
+  const res = await fetch(
+    `${base}/rest/v1/mynah_spotify_connections?select=refresh_token&order=updated_at.desc&limit=1`,
     {
       headers: {
         apikey: service,
@@ -275,6 +331,7 @@ async function oauthStateResponse(req: Request): Promise<Response> {
     return jsonResponse(500, { error: "SPOTIFY_CLIENT_ID is not configured" });
   }
   const state = await createOAuthState(userId);
+  await spotifyDebugEvent("oauth_state_created", undefined, userId);
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: "code",
@@ -290,20 +347,27 @@ async function callbackResponse(req: Request): Promise<Response> {
   const url = new URL(req.url);
   const err = (url.searchParams.get("error") ?? "").trim();
   if (err) {
+    await spotifyDebugEvent("callback_spotify_error", err);
     return redirectResponse(spotifyConnectPageUrl(req, { error: `Spotify authorization failed: ${err}` }), 303);
   }
   const code = (url.searchParams.get("code") ?? "").trim();
   const state = (url.searchParams.get("state") ?? "").trim();
   if (!code || !state) {
+    await spotifyDebugEvent("callback_missing_code_or_state");
     return redirectResponse(spotifyConnectPageUrl(req, { error: "Spotify callback is missing code or state." }), 303);
   }
   try {
+    await spotifyDebugEvent("callback_started");
     const userId = await consumeOAuthState(state);
     if (!userId) {
+      await spotifyDebugEvent("callback_state_expired");
       return redirectResponse(spotifyConnectPageUrl(req, { error: "Spotify authorization expired. Please try again." }), 303);
     }
+    await spotifyDebugEvent("callback_state_consumed", undefined, userId);
     const token = await exchangeSpotifyCode(code, spotifyRedirectUri(req));
+    await spotifyDebugEvent("callback_token_exchanged", token.refresh_token ? "refresh_token=yes" : "refresh_token=no", userId);
     const profile = await storeSpotifyConnection(userId, token);
+    await spotifyDebugEvent("callback_connection_stored", profile.display_name, userId);
     return redirectResponse(spotifyConnectPageUrl(req, {
       connected: "1",
       name: profile.display_name ?? "",
@@ -311,6 +375,7 @@ async function callbackResponse(req: Request): Promise<Response> {
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("Spotify callback failed", msg);
+    await spotifyDebugEvent("callback_failed", msg);
     return redirectResponse(spotifyConnectPageUrl(req, { error: "Spotify connection failed. Please try again." }), 303);
   }
 }
@@ -364,9 +429,10 @@ async function spotifyApi(
 ): Promise<Response> {
   const userId = await authUserId(req);
   const userRefreshToken = userId ? await userSpotifyRefreshToken(userId) : null;
+  const latestRefreshToken = userRefreshToken ? null : await latestSpotifyRefreshToken();
   const globalRefreshToken = spotifyEnv().refreshToken;
-  const refreshToken = userRefreshToken || globalRefreshToken;
-  const cacheKey = userRefreshToken ? `user:${userId}` : "global";
+  const refreshToken = userRefreshToken || latestRefreshToken || globalRefreshToken;
+  const cacheKey = userRefreshToken ? `user:${userId}` : latestRefreshToken ? "latest" : "global";
   const token = await getAccessToken(refreshToken, cacheKey);
   return await fetch(`https://api.spotify.com/v1${path}`, {
     method,
@@ -467,7 +533,7 @@ Deno.serve(async (req: Request) => {
 
   const suffix = functionPathSuffix(new URL(req.url));
   if (req.method === "GET" && (suffix === "" || suffix === "connect")) {
-    return connectPage(req);
+    return await connectPage(req);
   }
   if (req.method === "POST" && suffix === "oauth-state") {
     return await oauthStateResponse(req);
