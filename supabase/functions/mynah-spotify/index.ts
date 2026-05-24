@@ -4,6 +4,8 @@ import { corsHeaders, jsonResponse } from "../_shared/googleVoice.ts";
 
 type Action =
   | "status"
+  | "devices"
+  | "connect"
   | "toggle"
   | "next"
   | "previous"
@@ -14,6 +16,7 @@ type Action =
 
 type ReqBody = {
   action?: Action;
+  deviceName?: string;
 };
 
 type TokenCache = {
@@ -110,6 +113,10 @@ function defaultSpotifyUserId(): string {
     Deno.env.get("MYNAH_SPOTIFY_DEFAULT_USER_ID")?.trim() ||
     "20b89826-c35a-42eb-bb4d-c20108a3e54e"
   );
+}
+
+function preferredSpotifyDeviceName(): string {
+  return Deno.env.get("MYNAH_SPOTIFY_PREFERRED_DEVICE_NAME")?.trim() ?? "";
 }
 
 async function connectPage(req: Request): Promise<Response> {
@@ -444,6 +451,67 @@ async function spotifyApi(
   });
 }
 
+type SpotifyDevice = {
+  id?: string;
+  is_active?: boolean;
+  is_restricted?: boolean;
+  name?: string;
+  type?: string;
+};
+
+async function readDevices(req: Request): Promise<SpotifyDevice[]> {
+  const res = await spotifyApi(req, "GET", "/me/player/devices");
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`devices GET ${res.status}: ${text.slice(0, 200)}`);
+  }
+  const data = JSON.parse(text) as { devices?: SpotifyDevice[] };
+  return data.devices ?? [];
+}
+
+function chooseDevice(devices: SpotifyDevice[], preferredName?: string): SpotifyDevice | null {
+  const usable = devices.filter((d) => d.id && !d.is_restricted);
+  if (usable.length === 0) {
+    return null;
+  }
+  const wanted = (preferredName?.trim() || preferredSpotifyDeviceName()).toLowerCase();
+  if (wanted) {
+    const exact = usable.find((d) => (d.name ?? "").trim().toLowerCase() === wanted);
+    if (exact) return exact;
+    const partial = usable.find((d) => (d.name ?? "").trim().toLowerCase().includes(wanted));
+    if (partial) return partial;
+  }
+  return usable.find((d) => d.is_active) ??
+    usable.find((d) => (d.type ?? "").toLowerCase() === "speaker") ??
+    usable[0];
+}
+
+async function transferPlayback(req: Request, device: SpotifyDevice, play: boolean): Promise<void> {
+  if (!device.id) {
+    throw new Error("Selected Spotify device has no id");
+  }
+  const r = await spotifyApi(req, "PUT", "/me/player", {
+    body: JSON.stringify({ device_ids: [device.id], play }),
+  });
+  if (!r.ok && r.status !== 204) {
+    const t = await r.text();
+    throw new Error(`transfer ${r.status}: ${t.slice(0, 180)}`);
+  }
+}
+
+async function ensurePlaybackDevice(req: Request, preferredName?: string, play = false): Promise<SpotifyDevice> {
+  const devices = await readDevices(req);
+  const device = chooseDevice(devices, preferredName);
+  if (!device) {
+    throw new Error("No available Spotify Connect device. Open Spotify on a phone, desktop, speaker, or web player first.");
+  }
+  if (!device.is_active || play) {
+    await transferPlayback(req, device, play);
+    await new Promise((resolve) => setTimeout(resolve, 650));
+  }
+  return device;
+}
+
 function parsePlayerJson(json: string): {
   isPlaying: boolean;
   track: string;
@@ -529,11 +597,31 @@ Deno.serve(async (req: Request) => {
   }
 
   const action = (body.action ?? "status") as Action;
+  const preferredDeviceName = body.deviceName?.trim();
 
   try {
     if (action === "status") {
       const st = await readStatus(req);
       return jsonResponse(200, { ok: true, ...st });
+    }
+
+    if (action === "devices") {
+      const devices = await readDevices(req);
+      return jsonResponse(200, {
+        ok: true,
+        devices: devices.map((d) => ({
+          name: d.name ?? "",
+          type: d.type ?? "",
+          active: d.is_active === true,
+          restricted: d.is_restricted === true,
+        })),
+      });
+    }
+
+    if (action === "connect") {
+      const device = await ensurePlaybackDevice(req, preferredDeviceName, false);
+      const after = await readStatus(req);
+      return jsonResponse(200, { ok: true, connectedDeviceName: device.name ?? "", ...after });
     }
 
     if (action === "toggle") {
@@ -579,7 +667,11 @@ Deno.serve(async (req: Request) => {
       const r = await spotifyApi(req, "PUT", "/me/player/play");
       if (!r.ok && r.status !== 204) {
         const t = await r.text();
-        throw new Error(`play ${r.status}: ${t.slice(0, 160)}`);
+        if (r.status === 404 || /NO_ACTIVE_DEVICE|Player command failed/i.test(t)) {
+          await ensurePlaybackDevice(req, preferredDeviceName, true);
+        } else {
+          throw new Error(`play ${r.status}: ${t.slice(0, 160)}`);
+        }
       }
       const after = await readStatus(req);
       return jsonResponse(200, { ok: true, ...after });
