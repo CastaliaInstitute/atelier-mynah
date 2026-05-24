@@ -444,69 +444,43 @@ async function spotifyApi(
   });
 }
 
-function decodeJsonString(s: string): string {
-  return s
-    .replace(/\\\\/g, "\u0000")
-    .replace(/\\"/g, '"')
-    .replace(/\\n/g, "\n")
-    .replace(/\u0000/g, "\\");
-}
-
-function parseDeviceName(json: string): string {
-  const di = json.indexOf('"device"');
-  if (di < 0) {
-    return "";
-  }
-  const slice = json.slice(di, di + 2800);
-  if (slice.includes('"device":null') || slice.includes('"device" : null')) {
-    return "";
-  }
-  const nm = slice.match(/"name"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-  return nm ? decodeJsonString(nm[1]) : "";
-}
-
 function parsePlayerJson(json: string): {
   isPlaying: boolean;
   track: string;
   artist: string;
   deviceName: string;
+  albumImageUrl: string;
 } {
-  const deviceName = parseDeviceName(json);
-  let isPlaying = false;
-  const mPlay = json.match(/"is_playing"\s*:\s*(true|false)/);
-  if (mPlay) {
-    isPlaying = mPlay[1] === "true";
-  }
-  if (json.includes('"item":null')) {
-    return { isPlaying, track: "", artist: "", deviceName };
-  }
-  const itemIdx = json.indexOf('"item"');
-  if (itemIdx < 0) {
-    return { isPlaying, track: "", artist: "", deviceName };
-  }
-  const slice = json.slice(itemIdx, Math.min(json.length, itemIdx + 48_000));
-
-  let artist = "";
-  const artIdx = slice.indexOf(`"artists"`);
-  if (artIdx >= 0) {
-    const artSlice = slice.slice(artIdx, artIdx + 8000);
-    const artMatch = artSlice.match(/"name"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-    if (artMatch) {
-      artist = decodeJsonString(artMatch[1]);
+  const data = JSON.parse(json) as {
+    is_playing?: boolean;
+    device?: { name?: string } | null;
+    item?: {
+      name?: string;
+      artists?: Array<{ name?: string }>;
+      album?: {
+        images?: Array<{ url?: string; height?: number; width?: number }>;
+      };
+    } | null;
+  };
+  const images = data.item?.album?.images ?? [];
+  let albumImageUrl = "";
+  for (const img of images) {
+    if (!img?.url) {
+      continue;
+    }
+    albumImageUrl = img.url;
+    const edge = Math.min(img.width ?? 0, img.height ?? 0);
+    if (edge > 0 && edge <= 128) {
+      break;
     }
   }
-
-  let track = "";
-  const typeIdx = slice.lastIndexOf('"type":"track"');
-  if (typeIdx > 0) {
-    const before = slice.slice(0, typeIdx);
-    const names = [...before.matchAll(/"name"\s*:\s*"((?:[^"\\]|\\.)*)"/g)];
-    if (names.length > 0) {
-      track = decodeJsonString(names[names.length - 1][1]);
-    }
-  }
-
-  return { isPlaying, track, artist, deviceName };
+  return {
+    isPlaying: data.is_playing === true,
+    track: data.item?.name ?? "",
+    artist: data.item?.artists?.[0]?.name ?? "",
+    deviceName: data.device?.name ?? "",
+    albumImageUrl,
+  };
 }
 
 async function readStatus(req: Request): Promise<{
@@ -514,10 +488,11 @@ async function readStatus(req: Request): Promise<{
   track: string;
   artist: string;
   deviceName: string;
+  albumImageUrl: string;
 }> {
   const res = await spotifyApi(req, "GET", "/me/player");
   if (res.status === 204) {
-    return { isPlaying: false, track: "", artist: "", deviceName: "" };
+    return { isPlaying: false, track: "", artist: "", deviceName: "", albumImageUrl: "" };
   }
   const text = await res.text();
   if (!res.ok) {
@@ -629,6 +604,7 @@ Deno.serve(async (req: Request) => {
       track: "",
       artist: "",
       deviceName: "",
+      albumImageUrl: "",
       error: msg,
     });
   }
