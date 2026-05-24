@@ -1,0 +1,28 @@
+# Supabase local/dev config: https://supabase.com/docs/guides/cli/config
+
+[functions.voice-pipeline]
+verify_jwt = true
+
+[functions.ask-faculty]
+verify_jwt = true
+
+[functions.faculty-bust]
+verify_jwt = true
+
+[functions.mynah-commonplace-log]
+verify_jwt = true
+
+[functions.mynah-pocket-journal]
+verify_jwt = true
+
+[functions.mynah-spotify]
+# POST playback calls still validate Authorization manually. GET /connect and
+# /callback must remain public so Spotify/Supabase browser redirects can land.
+verify_jwt = false
+
+# PKCE sign-in page + pairing API (device polls with pair_secret; no user JWT yet).
+[functions.mynah-castalia-link]
+verify_jwt = false
+
+[functions.calcifer-status]
+verify_jwt = true
