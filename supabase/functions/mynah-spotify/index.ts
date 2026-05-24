@@ -93,7 +93,7 @@ function spotifyConnectPageUrl(req: Request, result?: Record<string, string>): s
   const base = supabaseUrl();
   const anon = anonKey();
   const functionBase = functionBaseUrl(req);
-  const origin = (Deno.env.get("MYNAH_SPOTIFY_CONNECT_ORIGIN")?.trim() || "https://music.inquiry.institute")
+  const origin = (Deno.env.get("MYNAH_SPOTIFY_CONNECT_ORIGIN")?.trim() || "https://music.castalia.institute")
     .replace(/\/+$/, "");
   const url = new URL("/spotify-connect.html", `${origin}/`);
   if (base) url.searchParams.set("supabase", base);
