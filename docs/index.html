@@ -3,64 +3,59 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mynah · Mindfulness at home · Castalia Institute</title>
-  <meta name="description" content="Mindfulness at home: gentle rhythm of light for nurseries, kitchens, and nightstands. Mynah is Castalia’s ambient companion — calm presence without another feed." />
+  <title>Mynah · Ambient household companion · Castalia Institute</title>
+  <meta name="description" content="Mynah is Castalia Institute's ambient household companion: a calm Android home surface, time-of-day glow, voice flows, music controls, and a bridge into the Astrolabe and Atlas ecosystem." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&amp;family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&amp;display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&amp;family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&amp;display=swap" rel="stylesheet" />
   <style>
     :root {
-      color-scheme: dark light;
-      --bg-deep: #0c0f0d;
-      --bg-card: #141815;
-      --bg-elevated: #1b201c;
-      --fg: #f2efe8;
-      --fg-soft: #e4dfd4;
-      --muted: #9a958a;
-      --line: rgba(242, 239, 232, 0.08);
-      --accent: #c8e085;
-      --accent-soft: rgba(200, 224, 133, 0.14);
-      --glow-dawn: rgba(255, 186, 140, 0.12);
-      --glow-dusk: rgba(180, 140, 110, 0.1);
-      --radius: 14px;
-      --radius-lg: 22px;
-      --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+      color-scheme: dark;
+      --ink: #f7f2e9;
+      --ink-soft: #ded6ca;
+      --muted: #aaa092;
+      --bg: #11120f;
+      --panel: #191b17;
+      --panel-2: #20231d;
+      --line: rgba(247, 242, 233, 0.12);
+      --amber: #f1bd66;
+      --sage: #b8d386;
+      --blue: #99b7d8;
+      --rose: #dd9a88;
+      --radius: 8px;
+      --font-display: "Fraunces", Georgia, serif;
       --font-body: "DM Sans", system-ui, sans-serif;
-      --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
     }
 
     @media (prefers-color-scheme: light) {
       :root {
-        --bg-deep: #faf8f4;
-        --bg-card: #ffffff;
-        --bg-elevated: #f3f0ea;
-        --fg: #1a1714;
-        --fg-soft: #2d2924;
-        --muted: #6b655c;
-        --line: rgba(26, 23, 20, 0.08);
-        --accent: #4f6b24;
-        --accent-soft: rgba(79, 107, 36, 0.1);
-        --glow-dawn: rgba(255, 160, 120, 0.15);
-        --glow-dusk: rgba(140, 110, 90, 0.08);
-        --shadow: 0 20px 60px rgba(45, 41, 36, 0.08);
+        color-scheme: light;
+        --ink: #181815;
+        --ink-soft: #333029;
+        --muted: #6c6258;
+        --bg: #fbf8f0;
+        --panel: #fffdf8;
+        --panel-2: #f0eadf;
+        --line: rgba(24, 24, 21, 0.14);
+        --shadow: 0 20px 58px rgba(74, 62, 42, 0.12);
       }
     }
 
     *, *::before, *::after { box-sizing: border-box; }
 
-    html {
-      scroll-behavior: smooth;
-    }
+    html { scroll-behavior: smooth; }
 
     body {
       margin: 0;
       font-family: var(--font-body);
-      font-size: 1.0625rem;
-      line-height: 1.65;
-      color: var(--fg-soft);
-      background: var(--bg-deep);
-      overflow-x: hidden;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--ink-soft);
+      background: var(--bg);
     }
+
+    img { max-width: 100%; }
 
     .skip {
       position: absolute;
@@ -70,339 +65,451 @@
       height: 1px;
       overflow: hidden;
     }
+
     .skip:focus {
       position: fixed;
       left: 1rem;
       top: 1rem;
       width: auto;
       height: auto;
-      padding: 0.5rem 1rem;
-      background: var(--accent);
-      color: var(--bg-deep);
       z-index: 100;
-      border-radius: 8px;
+      padding: 0.55rem 0.85rem;
+      border-radius: var(--radius);
+      color: #16130d;
+      background: var(--amber);
     }
 
-    /* Hero atmosphere */
-    .hero-bg {
+    .site-header {
       position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(ellipse 120% 80% at 50% -20%, var(--glow-dawn), transparent 55%),
-        radial-gradient(ellipse 90% 60% at 100% 40%, var(--accent-soft), transparent 45%),
-        radial-gradient(ellipse 70% 50% at 0% 80%, var(--glow-dusk), transparent 50%);
-      opacity: 1;
-    }
-
-    header.site-header {
-      position: relative;
-      z-index: 2;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 3;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      max-width: 1120px;
+      gap: 1rem;
+      width: min(1160px, calc(100% - 2rem));
       margin: 0 auto;
-      padding: 1.25rem clamp(1.25rem, 4vw, 2rem);
+      padding: 1.1rem 0;
     }
 
     .wordmark {
       font-family: var(--font-display);
-      font-weight: 600;
-      font-size: 1.25rem;
-      letter-spacing: -0.02em;
-      color: var(--fg);
+      font-size: 1.28rem;
+      font-weight: 700;
+      color: var(--ink);
       text-decoration: none;
+      text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
     }
 
     .wordmark span {
-      font-weight: 400;
-      opacity: 0.65;
-      font-size: 0.85em;
+      font-family: var(--font-body);
+      font-size: 0.72em;
+      font-weight: 600;
+      color: var(--ink-soft);
     }
 
-    nav.site-nav {
+    .site-nav {
       display: flex;
-      gap: 1.25rem;
       flex-wrap: wrap;
-      font-size: 0.9rem;
+      justify-content: flex-end;
+      gap: 0.35rem 0.9rem;
+      font-size: 0.92rem;
+      font-weight: 600;
     }
 
-    nav.site-nav a {
-      color: var(--muted);
+    .site-nav a {
+      color: var(--ink-soft);
       text-decoration: none;
+      text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
     }
-    nav.site-nav a:hover {
-      color: var(--accent);
-    }
+
+    .site-nav a:hover { color: var(--amber); }
 
     .hero {
       position: relative;
-      padding: clamp(2rem, 6vw, 4rem) clamp(1.25rem, 4vw, 2rem) clamp(3rem, 8vw, 5rem);
+      min-height: min(680px, 84vh);
+      display: grid;
+      align-items: end;
+      isolation: isolate;
+      padding: 6.5rem 1rem clamp(2.4rem, 8vh, 4rem);
+      overflow: hidden;
+      background: #15130f;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background-image:
+        linear-gradient(90deg, rgba(10, 9, 7, 0.92) 0%, rgba(10, 9, 7, 0.72) 38%, rgba(10, 9, 7, 0.2) 76%),
+        linear-gradient(0deg, rgba(17, 18, 15, 0.94) 0%, rgba(17, 18, 15, 0.16) 34%),
+        url("./assets/marketing/mynah-marketing-table.png");
+      background-size: cover;
+      background-position: center right;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background: var(--line);
     }
 
     .hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 1120px;
+      width: min(1160px, 100%);
       margin: 0 auto;
-      display: grid;
-      gap: clamp(2rem, 5vw, 3.5rem);
-      align-items: center;
-      grid-template-columns: 1fr;
     }
 
-    @media (min-width: 900px) {
-      .hero-inner {
-        grid-template-columns: 1.05fr 0.95fr;
-      }
-    }
-
-    .hero-copy h1 {
-      font-family: var(--font-display);
-      font-weight: 600;
-      font-size: clamp(2.35rem, 5.5vw, 3.35rem);
-      line-height: 1.12;
-      letter-spacing: -0.03em;
-      color: var(--fg);
+    .eyebrow {
       margin: 0 0 1rem;
-    }
-
-    .hero-copy .lede {
-      font-size: clamp(1.1rem, 2vw, 1.25rem);
-      color: var(--muted);
-      max-width: 34em;
-      margin: 0 0 1.75rem;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.35rem 0.85rem;
-      border-radius: 999px;
+      color: var(--sage);
       font-size: 0.78rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
+      font-weight: 700;
+      letter-spacing: 0.11em;
       text-transform: uppercase;
-      color: var(--accent);
-      background: var(--accent-soft);
-      border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
-      margin-bottom: 1.25rem;
     }
 
-    .hero-visual {
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--line);
-      aspect-ratio: 4 / 3;
-      background: var(--bg-card);
+    h1, h2, h3, p { overflow-wrap: anywhere; }
+
+    h1 {
+      max-width: 9em;
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(3.1rem, 7vw, 5.3rem);
+      line-height: 0.96;
+      color: var(--ink);
     }
 
-    .hero-visual img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
+    .lede {
+      max-width: 42rem;
+      margin: 1.25rem 0 0;
+      font-size: clamp(1.08rem, 2vw, 1.32rem);
+      color: var(--ink-soft);
     }
 
-    .hero-actions {
+    .hero-actions,
+    .action-row {
       display: flex;
       flex-wrap: wrap;
       gap: 0.75rem;
       align-items: center;
+      margin-top: 1.5rem;
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.65rem 1.35rem;
-      border-radius: 999px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      text-decoration: none;
+      min-height: 2.75rem;
+      padding: 0.66rem 1rem;
       border: 1px solid transparent;
-      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+      border-radius: var(--radius);
+      color: #17130c;
+      background: var(--amber);
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
     }
+
+    .btn:hover { transform: translateY(-1px); }
+
     .btn:focus-visible {
-      outline: 2px solid var(--accent);
+      outline: 2px solid var(--sage);
       outline-offset: 3px;
     }
-    .btn-primary {
-      background: var(--accent);
-      color: var(--bg-deep);
-    }
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.05);
-    }
-    .btn-ghost {
+
+    .btn.secondary {
+      color: var(--ink);
       border-color: var(--line);
-      color: var(--fg-soft);
-      background: transparent;
-    }
-    .btn-ghost:hover {
-      border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-      color: var(--fg);
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
     }
 
-    section.block {
-      padding: clamp(3rem, 8vw, 5rem) clamp(1.25rem, 4vw, 2rem);
+    main { background: var(--bg); }
+
+    .band {
       border-top: 1px solid var(--line);
+      padding: clamp(2.5rem, 5vw, 4rem) 1rem;
     }
 
-    .block-inner {
-      max-width: 720px;
+    .band.alt { background: var(--panel); }
+
+    .inner {
+      width: min(1160px, 100%);
       margin: 0 auto;
     }
 
-    .block-inner.wide {
-      max-width: 1120px;
-    }
-
-    section.block h2 {
-      font-family: var(--font-display);
-      font-weight: 600;
-      font-size: clamp(1.65rem, 3.5vw, 2.1rem);
-      letter-spacing: -0.02em;
-      color: var(--fg);
-      margin: 0 0 1rem;
-    }
-
-    section.block p {
-      margin: 0 0 1rem;
-      color: var(--muted);
-    }
-
-    section.block p:last-child {
-      margin-bottom: 0;
-    }
-
-    .pill-list {
-      list-style: none;
-      padding: 0;
-      margin: 1.5rem 0 0;
+    .section-head {
       display: grid;
-      gap: 0.85rem;
-    }
-
-    .pill-list li {
-      display: flex;
-      gap: 0.75rem;
-      align-items: flex-start;
-      padding: 1rem 1.15rem;
-      border-radius: var(--radius);
-      background: var(--bg-card);
-      border: 1px solid var(--line);
-      color: var(--fg-soft);
-      font-size: 0.98rem;
-    }
-
-    .pill-list li strong {
-      color: var(--fg);
-      font-weight: 600;
-    }
-
-    .pill-list li::before {
-      content: "";
-      flex-shrink: 0;
-      width: 8px;
-      height: 8px;
-      margin-top: 0.45rem;
-      border-radius: 50%;
-      background: var(--accent);
-      opacity: 0.85;
-    }
-
-    /* Gallery */
-    .gallery {
-      display: grid;
-      gap: clamp(1rem, 3vw, 1.35rem);
       grid-template-columns: 1fr;
-      margin-top: 2rem;
+      gap: 0.8rem;
+      margin-bottom: 1.65rem;
     }
 
-    @media (min-width: 640px) {
-      .gallery {
-        grid-template-columns: repeat(2, 1fr);
+    @media (min-width: 820px) {
+      .section-head {
+        grid-template-columns: minmax(15rem, 0.8fr) minmax(24rem, 1fr);
+        align-items: end;
       }
     }
 
-    figure.tile {
+    h2 {
       margin: 0;
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      border: 1px solid var(--line);
-      background: var(--bg-card);
-      box-shadow: var(--shadow);
+      color: var(--ink);
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3.1rem);
+      line-height: 1.05;
     }
 
-    figure.tile img {
+    .section-head p {
+      max-width: 45rem;
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    @media (min-width: 720px) {
+      .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card.pad { padding: 1.25rem; }
+
+    .card h3 {
+      margin: 0 0 0.45rem;
+      color: var(--ink);
+      font-size: 1.05rem;
+      line-height: 1.25;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .ecosystem-card {
+      display: grid;
+      min-height: 16rem;
+      align-content: space-between;
+      gap: 1rem;
+      padding: 1.25rem;
+      text-decoration: none;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .ecosystem-card:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--accent, var(--sage)) 55%, var(--line));
+      background: color-mix(in srgb, var(--panel-2) 88%, var(--accent, var(--sage)));
+    }
+
+    .ecosystem-card .tag {
+      color: var(--accent, var(--sage));
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+    }
+
+    .ecosystem-card strong {
+      display: block;
+      color: var(--ink);
+      font-family: var(--font-display);
+      font-size: clamp(1.65rem, 3vw, 2.35rem);
+      line-height: 1;
+    }
+
+    .ecosystem-card span {
+      display: block;
+      margin-top: 0.65rem;
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .ecosystem-card .link {
+      color: var(--ink);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .feature-image {
       width: 100%;
       aspect-ratio: 4 / 3;
       object-fit: cover;
       display: block;
     }
 
-    figure.tile figcaption {
-      padding: 1rem 1.15rem 1.15rem;
-      font-size: 0.92rem;
-      color: var(--muted);
-      line-height: 1.5;
+    .caption {
+      padding: 1rem;
     }
 
-    figure.tile figcaption strong {
-      display: block;
-      color: var(--fg);
+    .timeline {
+      display: grid;
+      gap: 1px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--line);
+    }
+
+    @media (min-width: 720px) {
+      .timeline { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .phase {
+      min-height: 13rem;
+      padding: 1rem;
+      background:
+        linear-gradient(160deg, var(--phase-a), var(--phase-b));
+      color: #17130c;
+    }
+
+    .phase h3 {
+      margin: 0 0 0.45rem;
       font-size: 1rem;
-      margin-bottom: 0.25rem;
+      color: inherit;
+    }
+
+    .phase p {
+      margin: 0;
+      color: rgba(23, 19, 12, 0.78);
+      font-size: 0.92rem;
+    }
+
+    .split {
+      display: grid;
+      gap: 1.4rem;
+      align-items: center;
+    }
+
+    @media (min-width: 840px) {
+      .split {
+        grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.95fr);
+      }
+    }
+
+    .copy p {
+      max-width: 47rem;
+      margin: 0 0 1rem;
+      color: var(--muted);
+    }
+
+    .copy p:last-child { margin-bottom: 0; }
+
+    .stack {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .stack-item {
+      border-left: 3px solid var(--accent, var(--sage));
+      padding: 0.75rem 0 0.75rem 1rem;
+    }
+
+    .stack-item strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 0.15rem;
+    }
+
+    .stack-item span {
+      color: var(--muted);
+      font-size: 0.95rem;
     }
 
     .closing {
-      text-align: center;
-      padding: clamp(3rem, 8vw, 4.5rem) 1.5rem;
       border-top: 1px solid var(--line);
-      background: linear-gradient(180deg, transparent, var(--accent-soft));
+      padding: clamp(2.5rem, 5vw, 4rem) 1rem;
+      background:
+        linear-gradient(rgba(17, 18, 15, 0.18), rgba(17, 18, 15, 0.86)),
+        url("./assets/marketing/mynah-marketing-hand.png");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .closing .inner {
+      display: grid;
+      gap: 1rem;
+      justify-items: start;
     }
 
     .closing p {
-      max-width: 36rem;
-      margin: 0 auto 1.25rem;
-      color: var(--muted);
+      max-width: 42rem;
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: clamp(1.1rem, 2vw, 1.32rem);
     }
 
-    .closing .btn-primary {
-      margin-top: 0.25rem;
-    }
-
-    footer.site-footer {
-      padding: 2rem clamp(1.25rem, 4vw, 2rem) 2.5rem;
-      border-top: 1px solid var(--line);
-      max-width: 1120px;
-      margin: 0 auto;
+    footer {
       display: flex;
       flex-wrap: wrap;
-      gap: 1rem;
       justify-content: space-between;
-      align-items: center;
-      font-size: 0.875rem;
+      gap: 1rem;
+      width: min(1160px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 1.5rem 0 2rem;
       color: var(--muted);
+      font-size: 0.9rem;
     }
 
-    footer.site-footer a {
+    footer a {
       color: var(--muted);
       text-decoration: none;
     }
-    footer.site-footer a:hover {
-      color: var(--accent);
-    }
+
+    footer a:hover { color: var(--amber); }
 
     .footer-links {
       display: flex;
       flex-wrap: wrap;
-      gap: 1rem 1.5rem;
+      gap: 0.9rem 1.2rem;
+    }
+
+    @media (max-width: 640px) {
+      .site-header {
+        position: relative;
+        width: 100%;
+        padding: 0.9rem 1rem;
+        background: var(--bg);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .site-nav { display: none; }
+
+      .hero {
+        min-height: 78vh;
+        padding-top: 4rem;
+      }
+
+      .hero::before {
+        background-image:
+          linear-gradient(0deg, rgba(10, 9, 7, 0.96) 0%, rgba(10, 9, 7, 0.66) 62%, rgba(10, 9, 7, 0.18) 100%),
+          url("./assets/marketing/mynah-marketing-table.png");
+      }
+
+      .btn { width: 100%; }
     }
   </style>
 </head>
@@ -410,127 +517,200 @@
   <a class="skip" href="#main">Skip to content</a>
 
   <header class="site-header">
-    <a class="wordmark" href="#">Mynah <span>· Castalia</span></a>
-    <nav class="site-nav" aria-label="Secondary">
-      <a href="#idea">The idea</a>
-      <a href="#places">At home</a>
-      <a href="#product">Mynah</a>
-      <a href="./design/README.md">Design docs</a>
+    <a class="wordmark" href="#">Mynah <span>by Castalia</span></a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="#ambient">Ambient</a>
+      <a href="#surfaces">Surfaces</a>
+      <a href="#ecosystem">Ecosystem</a>
+      <a href="#build">Build</a>
+      <a href="./design/README.md">Docs</a>
     </nav>
   </header>
 
-  <div class="hero">
-    <div class="hero-bg" aria-hidden="true"></div>
-    <div class="hero-inner" id="main">
-      <div class="hero-copy">
-        <p class="badge">Mindfulness at home</p>
-        <h1>Calm belongs in the rooms where life happens.</h1>
-        <p class="lede">
-          Most “wellness” products chase you through notifications. This project asks a quieter question:
-          <strong style="color: var(--fg-soft); font-weight: 600;">what if your home had a gentle sense of time</strong>—a soft rhythm of light that supports winding down, waking up, and staying oriented through the night—without demanding another scroll?
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#product">Meet Mynah</a>
-          <a class="btn btn-ghost" href="https://github.com/CastaliaInstitute/mynah">Source on GitHub</a>
+  <section class="hero" id="main">
+    <div class="hero-inner">
+      <p class="eyebrow">Ambient household companion</p>
+      <h1>Mynah gives the house a calmer sense of time.</h1>
+      <p class="lede">
+        A compact Android home surface that turns a small screen into a gentle glow, a voice endpoint, a music control point, and a bridge into Castalia's instruments for inquiry and learning.
+      </p>
+      <div class="hero-actions">
+        <a class="btn" href="#build">Explore the build</a>
+        <a class="btn secondary" href="https://github.com/CastaliaInstitute/mynah">Source on GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <section class="band" id="ambient">
+      <div class="inner">
+        <div class="section-head">
+          <h2>Mostly quiet, useful when invited.</h2>
+          <p>
+            Mynah starts from domestic attention rather than app attention. Its default behavior is a full-screen time-of-day glow with conservative night brightness, slow transitions, and just enough status to keep a room oriented.
+          </p>
+        </div>
+        <div class="timeline" aria-label="Ambient glow phases">
+          <div class="phase" style="--phase-a: #c9d6ef; --phase-b: #f4bfa2;">
+            <h3>Dawn</h3>
+            <p>A slow lift toward morning: rose, peach, and a little cool sky.</p>
+          </div>
+          <div class="phase" style="--phase-a: #f6f0dd; --phase-b: #c8d8bd;">
+            <h3>Day</h3>
+            <p>Neutral presence, often nearly off, so the object can fade into the room.</p>
+          </div>
+          <div class="phase" style="--phase-a: #d38b5d; --phase-b: #5d6b86;">
+            <h3>Dusk</h3>
+            <p>Warm wind-down cues with brightness falling before contrast starts to feel sharp.</p>
+          </div>
+          <div class="phase" style="--phase-a: #3c271d; --phase-b: #8f4f35;">
+            <h3>Sleep</h3>
+            <p>Orientation-only nightlight levels for nurseries, kitchens, and bedside tables.</p>
+          </div>
         </div>
       </div>
-      <div class="hero-visual" role="img" aria-label="Mynah ambient device glowing softly on a bedside table">
-        <img src="./assets/marketing/mynah-marketing-table.png" alt="Compact phone-sized Mynah device on a bedside table, screen showing a soft dawn glow" width="1200" height="900" loading="eager" />
+    </section>
+
+    <section class="band alt" id="surfaces">
+      <div class="inner">
+        <div class="section-head">
+          <h2>One product, several home surfaces.</h2>
+          <p>
+            The front page now mirrors the repository: Android app, Supabase Edge Functions, LAN discovery, Spotify controls, and ESP32 pocketwatch firmware are all part of the same household object system.
+          </p>
+        </div>
+        <div class="grid three">
+          <article class="card pad">
+            <h3>Home glow</h3>
+            <p>Android ambient mode keeps the mini-phone form factor readable as a quiet table, shelf, or outlet-side object.</p>
+          </article>
+          <article class="card pad">
+            <h3>Voice and faculty</h3>
+            <p>Shared Edge Functions route short voice turns, speech-to-text, faculty-flavored replies, and TTS without putting provider secrets on devices.</p>
+          </article>
+          <article class="card pad">
+            <h3>Music and rooms</h3>
+            <p>Spotify and LAN/Home Assistant work make Mynah a small coordination point for household audio and status.</p>
+          </article>
+        </div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <section class="block" id="idea">
-    <div class="block-inner">
-      <h2>A domestic kind of attention</h2>
-      <p>
-        <strong style="color: var(--fg); font-weight: 600;">Mindfulness at home</strong> isn’t only meditation apps or journals. It’s also what your senses receive when you’re off duty—especially at night.
-        Harsh LEDs, endless feeds, and “smart” gadgets that ping for attention can leave a household feeling wired when it should feel safe.
-      </p>
-      <p>
-        We’re exploring a different posture: <strong style="color: var(--fg); font-weight: 600;">ambient presence</strong>.
-        Something small and honest that lives on an outlet, a table, or in your hand—mostly unnoticed until you need it—offering a wash of color and brightness that tracks the day with patience, not urgency.
-      </p>
-      <ul class="pill-list">
-        <li><strong>Slow change.</strong> Light transitions unfold over minutes, not jerky presets—so your nervous system isn’t surprised.</li>
-        <li><strong>Warmth over spectacle.</strong> Dawn and dusk lean into tones we associate with sky light; sleep phases stay gentle and capped—ambient, not a studio spotlight.</li>
-        <li><strong>Quiet default.</strong> Neutral daylight can fade toward stillness; the object can read as decor until you’re paying attention.</li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="block" id="places">
-    <div class="block-inner wide">
-      <h2>The same calm, different rooms</h2>
-      <p style="max-width: 40rem;">
-        Homes aren’t one scene—a nursery floor, a kitchen counter, a bedside table all carry different needs.
-        The project stays grounded in <strong style="color: var(--fg); font-weight: 600;">real outlets and surfaces</strong>: places where a mini-phone-sized companion can sit unobtrusively and cast its glow toward the room.
-      </p>
-      <div class="gallery">
-        <figure class="tile">
-          <img src="./assets/marketing/mynah-marketing-nursery-outlet.png" alt="Mynah plugged into a low wall outlet in a nursery, soft glow" width="1200" height="900" loading="lazy" />
-          <figcaption>
-            <strong>Nursery &amp; floor-height outlets</strong>
-            Orientation light for nighttime checks—without turning the ceiling into a stadium.
-          </figcaption>
-        </figure>
-        <figure class="tile">
-          <img src="./assets/marketing/mynah-marketing-table.png" alt="Mynah on a wooden table with soft ambient screen glow" width="1200" height="900" loading="lazy" />
-          <figcaption>
-            <strong>Bedside &amp; tables</strong>
-            Where dawn and dusk cues land closest to sleep and waking.
-          </figcaption>
-        </figure>
-        <figure class="tile">
-          <img src="./assets/marketing/mynah-marketing-hand.png" alt="Hand holding pocket-sized Mynah device with gentle glow" width="1200" height="900" loading="lazy" />
-          <figcaption>
-            <strong>In hand</strong>
-            Pocket-scale reassurance—same rectangular mini-phone form you’d recognize anywhere.
-          </figcaption>
-        </figure>
-        <figure class="tile">
-          <img src="./assets/marketing/mynah-marketing-kitchen-outlet.png" alt="Mynah in kitchen outlet near counter with soft glow" width="1200" height="900" loading="lazy" />
-          <figcaption>
-            <strong>Kitchen &amp; counters</strong>
-            A steady domestic rhythm while hands are busy and minds are full.
-          </figcaption>
-        </figure>
+    <section class="band" id="ecosystem">
+      <div class="inner">
+        <div class="section-head">
+          <h2>Part of a larger Castalia hardware ecology.</h2>
+          <p>
+            Mynah is the household ambient node. Astrolabe carries questions on a round pocket instrument. Atlas provides purpose-built learning compute. Together they make Castalia feel less like a single app and more like a family of owned, situated tools.
+          </p>
+        </div>
+        <div class="grid three">
+          <a class="card ecosystem-card" href="https://mynah.castalia.institute/" style="--accent: var(--amber);">
+            <span class="tag">Household rhythm</span>
+            <span>
+              <strong>Mynah</strong>
+              <span>Ambient glow, room status, music, voice, and the calm home surface for the ecosystem.</span>
+            </span>
+            <span class="link">mynah.castalia.institute</span>
+          </a>
+          <a class="card ecosystem-card" href="https://astrolabe.castalia.institute/" style="--accent: var(--rose);">
+            <span class="tag">Pocket inquiry</span>
+            <span>
+              <strong>Astrolabe</strong>
+              <span>A 1.75-inch round module for time, moon, music, orientation, memory, and short faculty-guided questions.</span>
+            </span>
+            <span class="link">astrolabe.castalia.institute</span>
+          </a>
+          <a class="card ecosystem-card" href="https://atlas.castalia.institute/" style="--accent: var(--blue);">
+            <span class="tag">Learning compute</span>
+            <span>
+              <strong>Atlas</strong>
+              <span>Open, privacy-minded compute platforms for learners, field work, iNQ Cards, and local Castalia infrastructure.</span>
+            </span>
+            <span class="link">atlas.castalia.institute</span>
+          </a>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="block" id="product">
-    <div class="block-inner">
-      <h2>Mynah — the hardware expression</h2>
-      <p>
-        <strong style="color: var(--fg); font-weight: 600;">Mynah</strong> is Castalia Institute’s ambient companion for this mindfulness-at-home direction:
-        a compact <strong style="color: var(--fg); font-weight: 600;">mini-phone–sized rectangular slab</strong> whose screen becomes a soft, full-field glow—dawn, neutral day, dusk, and sleep phases—rather than another feed.
-      </p>
-      <p>
-        It is deliberately <strong style="color: var(--fg); font-weight: 600;">not</strong> a cube, sphere, or novelty lamp silhouette; the shape reads as a small phone-scale object so it fits outlets, stands, and pockets without pretending to be sculpture first.
-      </p>
-      <p>
-        Product behavior and brightness philosophy are documented for builders and partners—circadian-inspired, conservative at night, with smooth transitions (see design specs below). We describe experience carefully and avoid overstating medical claims: this is <strong style="color: var(--fg); font-weight: 600;">comfort-oriented ambient design</strong>.
-      </p>
-      <div class="hero-actions" style="margin-top: 1.75rem;">
-        <a class="btn btn-primary" href="./design/hardware-platform.md">Hardware platform</a>
-        <a class="btn btn-ghost" href="./design/ambient-time-of-day.md">Ambient phases</a>
+    <section class="band">
+      <div class="inner">
+        <div class="section-head">
+          <h2>Designed for ordinary places.</h2>
+          <p>
+            The main hardware expression stays phone-shaped: portrait rectangle, one dominant glowing face, thin enough for pockets and docks. The images stay grounded in real surfaces rather than imaginary product silhouettes.
+          </p>
+        </div>
+        <div class="grid two">
+          <figure class="card">
+            <img class="feature-image" src="./assets/marketing/mynah-marketing-nursery-outlet.png" alt="Mynah in a low nursery outlet with a soft glow" width="1200" height="900" loading="lazy" />
+            <figcaption class="caption">
+              <h3>Night checks</h3>
+              <p>Light enough to orient a room without turning a quiet hour into a ceiling-light event.</p>
+            </figcaption>
+          </figure>
+          <figure class="card">
+            <img class="feature-image" src="./assets/marketing/mynah-marketing-kitchen-outlet.png" alt="Mynah near a kitchen outlet with soft ambient light" width="1200" height="900" loading="lazy" />
+            <figcaption class="caption">
+              <h3>Busy counters</h3>
+              <p>A steady cue for time, music, and household state while hands are elsewhere.</p>
+            </figcaption>
+          </figure>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="closing">
-    <p>
-      If this resonates—thoughtful hardware for households that want less noise and more room to breathe—we’d love collaborators, reviewers, and gentle critics.
-    </p>
-    <a class="btn btn-primary" href="https://github.com/CastaliaInstitute/mynah">Follow the repo</a>
-  </section>
+    <section class="band alt" id="build">
+      <div class="inner split">
+        <div class="copy">
+          <p class="eyebrow">Current build map</p>
+          <h2>From ambient phone to pocket satellite.</h2>
+          <p>
+            The Android app is the primary home surface. Supabase functions provide shared voice and faculty routes. The ESP32-S3 Pocketwatch work now sits beside Astrolabe as the round-device path, while Atlas names the larger learning-compute family around the home.
+          </p>
+          <div class="action-row">
+            <a class="btn" href="./design/hardware-platform.md">Hardware platform</a>
+            <a class="btn secondary" href="./design/pocketwatch.md">Pocketwatch spec</a>
+          </div>
+        </div>
+        <div class="stack" aria-label="Build layers">
+          <div class="stack-item" style="--accent: var(--amber);">
+            <strong>Android home surface</strong>
+            <span>Glow screen, QR/LAN flows, OTA, Spotify, Home Assistant, and voice UI.</span>
+          </div>
+          <div class="stack-item" style="--accent: var(--blue);">
+            <strong>Shared backend</strong>
+            <span>Supabase Edge Functions for voice pipeline, faculty busts, Castalia link, and commonplace logging.</span>
+          </div>
+          <div class="stack-item" style="--accent: var(--rose);">
+            <strong>Astrolabe / Pocketwatch firmware</strong>
+            <span>ESP32-S3 round display satellites with Wi-Fi, BLE, voice/text turns, sky/time faces, and future home presence.</span>
+          </div>
+          <div class="stack-item" style="--accent: var(--sage);">
+            <strong>Atlas learning compute</strong>
+            <span>Purpose-built devices and local appliances for iNQ Cards, field learning, local AI, and private household infrastructure.</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <footer class="site-footer">
-    <span>© Castalia Institute · Mynah</span>
+    <section class="closing">
+      <div class="inner">
+        <p>
+          Mynah is an open build for calmer household computing: less feed, more rhythm, and a home node that can speak naturally with Astrolabe in the pocket and Atlas in the learning room.
+        </p>
+        <a class="btn" href="https://github.com/CastaliaInstitute/mynah">Follow the repo</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>&copy; Castalia Institute · Mynah</span>
     <div class="footer-links">
-      <a href="./design/README.md">Design index</a>
-      <a href="https://github.com/CastaliaInstitute/mynah">GitHub</a>
+      <a href="./design/README.md">Design docs</a>
+      <a href="./technology/README.md">Technology notes</a>
+      <a href="https://astrolabe.castalia.institute/">Astrolabe</a>
+      <a href="https://atlas.castalia.institute/">Atlas</a>
       <a href="https://castalia.institute/">Castalia Institute</a>
     </div>
   </footer>
