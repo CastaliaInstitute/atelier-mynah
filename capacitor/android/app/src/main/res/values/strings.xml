@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mynah</string>
+    <string name="title_activity_main">Mynah</string>
+    <string name="package_name">institute.castalia.mynah.capacitor</string>
+    <string name="custom_url_scheme">institute.castalia.mynah.capacitor</string>
+</resources>
