@@ -1,0 +1,8 @@
+# Atelier repository identity
+atelier: true
+organization: CastaliaInstitute
+project: mynah
+product: device
+maturity: sapling
+hardware_availability: beta-hardware-available-now
+pages_url: https://mynah.castalia.institute/
