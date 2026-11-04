@@ -3,6 +3,9 @@
 [functions.voice-pipeline]
 verify_jwt = true
 
+[functions.reliquary-photo-voice]
+verify_jwt = false
+
 [functions.ask-faculty]
 verify_jwt = true
 
