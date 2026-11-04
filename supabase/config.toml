@@ -27,5 +27,10 @@ verify_jwt = false
 [functions.mynah-castalia-link]
 verify_jwt = false
 
+# Auth is checked inside the function for Watch users and with a dedicated
+# ALPHEUS_WATCH_RELAY_KEY for the Al host worker.
+[functions.mynah-watch-al-relay]
+verify_jwt = false
+
 [functions.calcifer-status]
 verify_jwt = true
